@@ -2,7 +2,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 
 export function DashboardPage() {
-  const { resolvedTheme } = useTheme();
+  useTheme();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6">
