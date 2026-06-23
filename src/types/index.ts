@@ -1,3 +1,5 @@
+// ==================== 核心实体 ====================
+
 export interface Client {
   id?: number;
   name: string;
@@ -15,11 +17,11 @@ export interface Client {
 
 export interface Project {
   id?: number;
-  clientId: number;
+  clientId: number | null;
   name: string;
   description: string;
-  status: 'quoted' | 'active' | 'completed' | 'invoiced' | 'paid' | 'cancelled';
-  budget: number;
+  status: ProjectStatus;
+  budget: number | null;
   currency: string;
   startDate: Date | null;
   endDate: Date | null;
@@ -29,6 +31,14 @@ export interface Project {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type ProjectStatus = 
+  | 'quoted' 
+  | 'active' 
+  | 'completed' 
+  | 'invoiced' 
+  | 'paid' 
+  | 'cancelled';
 
 export interface TimeEntry {
   id?: number;
@@ -49,21 +59,51 @@ export interface Income {
   amount: number;
   currency: string;
   date: Date;
-  type: 'hourly' | 'fixed' | 'retainer' | 'bonus' | 'other';
+  type: IncomeType;
   notes: string;
   isTaxable: boolean;
   createdAt: Date;
 }
 
+export type IncomeType = 'hourly' | 'fixed' | 'retainer' | 'bonus' | 'other';
+
 export interface Expense {
   id?: number;
-  category: 'software' | 'hardware' | 'office' | 'travel' | 'marketing' | 'professional_services' | 'taxes' | 'other';
+  category: ExpenseCategory;
   amount: number;
   currency: string;
   date: Date;
   description: string;
   isDeductible: boolean;
   receiptUrl: string | null;
+  createdAt: Date;
+}
+
+export type ExpenseCategory = 
+  | 'software' 
+  | 'hardware' 
+  | 'office' 
+  | 'travel' 
+  | 'marketing' 
+  | 'professional_services' 
+  | 'taxes' 
+  | 'other';
+
+export interface Invoice {
+  id?: number;
+  clientId: number;
+  projectId: number | null;
+  invoiceNumber: string;
+  issueDate: Date;
+  dueDate: Date;
+  items: InvoiceItem[];
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  currency: string;
+  status: InvoiceStatus;
+  notes: string;
   createdAt: Date;
 }
 
@@ -74,36 +114,37 @@ export interface InvoiceItem {
   total: number;
 }
 
-export interface Invoice {
-  id?: number;
-  projectId: number | null;
-  clientId: number;
-  invoiceNumber: string;
-  issueDate: Date;
-  dueDate: Date;
-  items: InvoiceItem[];
-  subtotal: number;
-  taxRate: number;
-  taxAmount: number;
-  total: number;
-  currency: string;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  notes: string;
-  createdAt: Date;
-}
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
 export interface AppSettings {
   key: string;
-  value?: any;
-  currency?: string;
-  language?: string;
-  colorScheme?: 'light' | 'dark' | 'system';
+  value: any;
 }
 
-export interface TimerState {
-  isRunning: boolean;
-  startTime: Date | null;
-  elapsedSeconds: number;
-  selectedProjectId: number | null;
-  description: string;
+// ==================== UI 类型 ====================
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+export interface DashboardStats {
+  totalIncome: number;
+  totalHours: number;
+  avgHourlyRate: number;
+  activeProjectsCount: number;
+  pendingInvoicesCount: number;
+  monthlyIncomeData: MonthlyIncomeData[];
+  clientIncomeData: ClientIncomeData[];
+}
+
+export interface MonthlyIncomeData {
+  month: string;
+  amount: number;
+}
+
+export interface ClientIncomeData {
+  name: string;
+  value: number;
 }

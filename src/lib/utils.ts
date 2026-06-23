@@ -1,20 +1,18 @@
-import { clsx, type ClassValue } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { format } from 'date-fns';
-import { CURRENCIES } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
-  const currency = CURRENCIES.find((c) => c.code === currencyCode);
-  const symbol = currency?.symbol || '$';
-
-  return `${symbol}${amount.toLocaleString('en-US', {
+export function formatCurrency(amount: number, currency: string = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  }).format(amount);
 }
 
 export function formatDuration(seconds: number): string {
@@ -22,29 +20,53 @@ export function formatDuration(seconds: number): string {
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
   if (hours > 0) {
-    return `${hours}:${pad(minutes)}:${pad(secs)}`;
+    return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`;
   }
-  return `${pad(minutes)}:${pad(secs)}`;
+  if (minutes > 0) {
+    return `${minutes}m ${secs > 0 ? `${secs}s` : ''}`;
+  }
+  return `${secs}s`;
 }
 
-export function formatDurationHours(seconds: number): string {
+export function formatDurationDecimal(seconds: number): string {
   const hours = seconds / 3600;
   return `${hours.toFixed(1)}h`;
 }
 
-export function formatDate(date: Date | string, dateFormat: string = 'MM/dd/yyyy'): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return format(d, dateFormat);
+export function formatDate(date: Date | string | number, pattern: string = 'MM/dd/yyyy'): string {
+  return format(new Date(date), pattern);
+}
+
+export function formatDateRelative(date: Date | string | number): string {
+  const now = new Date();
+  const target = new Date(date);
+  const diffMs = now.getTime() - target.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return formatDate(date, 'MMM d, yyyy');
 }
 
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 9);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-export function getCurrencySymbol(code: string): string {
-  const currency = CURRENCIES.find((c) => c.code === code);
-  return currency?.symbol || '$';
+export function generateInvoiceNumber(): string {
+  const year = new Date().getFullYear();
+  const random = Math.floor(Math.random() * 9000) + 1000;
+  return `INV-${year}-${random}`;
+}
+
+export function getLast6Months(): string[] {
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(format(d, 'MMM'));
+  }
+  return months;
 }
