@@ -1,103 +1,33 @@
-import { useEffect } from 'react';
-import { DollarSign, Clock, FolderKanban, TrendingUp } from 'lucide-react';
-import { AppShell } from '@/components/layout/AppShell';
-import { StatCard } from '@/components/dashboard/StatCard';
-import { IncomeChart } from '@/components/dashboard/IncomeChart';
-import { ClientPieChart } from '@/components/dashboard/ClientPieChart';
-import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import { QuickActions } from '@/components/dashboard/QuickActions';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useDashboard } from '@/hooks/useDashboard';
-import { formatCurrency, formatDurationHours } from '@/lib/utils';
+import { useTheme } from '@/hooks/useTheme';
+import { ArrowLeft, LayoutDashboard } from 'lucide-react';
 
 export function DashboardPage() {
-  const { stats, loading, fetchStats } = useDashboard();
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+  const { resolvedTheme } = useTheme();
 
   return (
-    <AppShell title="Dashboard">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-lg border p-6">
-                <Skeleton className="h-4 w-24 mb-4" />
-                <Skeleton className="h-8 w-32" />
-              </div>
-            ))
-          ) : (
-            <>
-              <StatCard
-                title="Monthly Income"
-                value={formatCurrency(stats?.monthlyIncome || 0)}
-                icon={DollarSign}
-                iconColor="text-emerald-500"
-              />
-              <StatCard
-                title="Billable Hours"
-                value={formatDurationHours((stats?.billableHours || 0) * 3600)}
-                icon={Clock}
-                iconColor="text-blue-500"
-              />
-              <StatCard
-                title="Active Projects"
-                value={stats?.activeProjects?.toString() || '0'}
-                icon={FolderKanban}
-                iconColor="text-purple-500"
-              />
-              <StatCard
-                title="Avg Hourly Rate"
-                value={formatCurrency(stats?.avgHourlyRate || 0)}
-                icon={TrendingUp}
-                iconColor="text-amber-500"
-              />
-            </>
-          )}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6">
+      <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 shadow-lg text-center">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6">
+          <LayoutDashboard className="w-8 h-8 text-emerald-500" />
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {loading ? (
-            <>
-              <div className="lg:col-span-2 rounded-lg border p-6">
-                <Skeleton className="h-4 w-32 mb-4" />
-                <Skeleton className="h-64 w-full" />
-              </div>
-              <div className="rounded-lg border p-6">
-                <Skeleton className="h-4 w-32 mb-4" />
-                <Skeleton className="h-64 w-full" />
-              </div>
-            </>
-          ) : (
-            <>
-              <IncomeChart data={stats?.incomeTrend || []} />
-              <ClientPieChart data={stats?.clientBreakdown || []} />
-            </>
-          )}
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+          Dashboard Coming Soon
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+          The full dashboard with clients, projects, time tracking, and invoicing is under development. Check back soon!
+        </p>
+        <div className="flex items-center justify-center gap-2 text-sm text-slate-400 dark:text-slate-500 mb-6">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          Currently in Phase 2 of development
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {loading ? (
-            <>
-              <div className="lg:col-span-2 rounded-lg border p-6">
-                <Skeleton className="h-4 w-32 mb-4" />
-                <Skeleton className="h-64 w-full" />
-              </div>
-              <div className="rounded-lg border p-6">
-                <Skeleton className="h-4 w-32 mb-4" />
-                <Skeleton className="h-64 w-full" />
-              </div>
-            </>
-          ) : (
-            <>
-              <RecentActivity activities={stats?.recentActivity || []} />
-              <QuickActions />
-            </>
-          )}
-        </div>
+        <a
+          href="#/"
+          className="inline-flex items-center gap-2 h-10 px-4 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </a>
       </div>
-    </AppShell>
+    </div>
   );
 }
