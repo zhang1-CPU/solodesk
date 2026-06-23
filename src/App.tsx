@@ -1,34 +1,63 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { LandingPage } from '@/pages/LandingPage';
-import { AppShell } from '@/components/layout/AppShell';
+import { useState, useEffect } from 'react';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { ClientsPage } from '@/pages/ClientsPage';
+import { ProjectsPage } from '@/pages/ProjectsPage';
+import { TimeTrackerPage } from '@/pages/TimeTrackerPage';
+import { IncomePage } from '@/pages/IncomePage';
+import { InvoicesPage } from '@/pages/InvoicesPage';
+import { SettingsPage } from '@/pages/SettingsPage';
+import { LandingPage } from '@/pages/LandingPage';
+import { db } from '@/lib/db';
 
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h1>
-      <p className="text-slate-500 dark:text-slate-400 mt-2">Coming in the next update.</p>
-    </div>
-  );
-}
+function AppContent() {
+  const [initialized, setInitialized] = useState(false);
+  const [hasData, setHasData] = useState(false);
 
-function App() {
+  useEffect(() => {
+    const initApp = async () => {
+      await db.open();
+      
+      const clientCount = await db.clients.count();
+      setHasData(clientCount > 0);
+      
+      setInitialized(true);
+    };
+    
+    initApp();
+  }, []);
+
+  if (!initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-500 dark:text-slate-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <HashRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route element={<AppShell />}>
-          <Route path="/app/dashboard" element={<DashboardPage />} />
-          <Route path="/app/clients" element={<PlaceholderPage title="Clients" />} />
-          <Route path="/app/projects" element={<PlaceholderPage title="Projects" />} />
-          <Route path="/app/time-tracker" element={<PlaceholderPage title="Time Tracker" />} />
-          <Route path="/app/income" element={<PlaceholderPage title="Income" />} />
-          <Route path="/app/invoices" element={<PlaceholderPage title="Invoices" />} />
-          <Route path="/app/settings" element={<PlaceholderPage title="Settings" />} />
-        </Route>
+        <Route
+          path="/"
+          element={hasData ? <Navigate to="/dashboard" /> : <LandingPage />}
+        />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/time-tracker" element={<TimeTrackerPage />} />
+        <Route path="/income" element={<IncomePage />} />
+        <Route path="/invoices" element={<InvoicesPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </HashRouter>
+    </Router>
   );
 }
 
-export default App;
+export default function App() {
+  return <AppContent />;
+}

@@ -1,34 +1,38 @@
 import { create } from 'zustand';
-import type { Toast } from '@/types';
+
+interface Toast {
+  id: string;
+  title: string;
+  description?: string;
+  variant?: 'default' | 'destructive' | 'success';
+  message?: string;
+  type?: 'success' | 'error' | 'warning';
+}
 
 interface UIState {
   sidebarOpen: boolean;
+  mobileNavOpen: boolean;
   toasts: Toast[];
-  isLoading: boolean;
-
   toggleSidebar: () => void;
-  addToast: (message: string, type: Toast['type']) => void;
+  setSidebarOpen: (open: boolean) => void;
+  setMobileNavOpen: (open: boolean) => void;
+  addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
-  setLoading: (loading: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  sidebarOpen: false,
+  sidebarOpen: true,
+  mobileNavOpen: false,
   toasts: [],
-  isLoading: false,
-
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-
-  addToast: (message, type) => {
+  setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setMobileNavOpen: (open) => set({ mobileNavOpen: open }),
+  addToast: (toast) => {
     const id = Math.random().toString(36).substring(2, 9);
-    set((state) => ({ toasts: [...state.toasts, { id, message, type }] }));
-
+    set((state) => ({ toasts: [...state.toasts, { ...toast, id }] }));
     setTimeout(() => {
       set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
-    }, type === 'error' ? 5000 : 3000);
+    }, 3000);
   },
-
   removeToast: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
-
-  setLoading: (loading) => set({ isLoading: loading }),
 }));

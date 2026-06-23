@@ -1,29 +1,45 @@
-# SoloDesk
+# Solodesk - Freelancer Command Center
 
-Privacy-first freelance business dashboard. No cloud, no accounts.
+A browser-based freelancer command center for tracking clients, projects, time, and income with local data storage (IndexedDB).
 
 ## Features
 
-- Time Tracking
-- Client Management
-- Project Management
-- Income & Expenses
-- Invoice Generation
+- 📊 Dashboard with key metrics and charts
+- 👥 Client management
+- 📋 Project tracking with Kanban view
+- ⏱️ Time tracker
+- 💰 Income and expense management
+- 📄 Invoice generation
+- ⚙️ Settings with data export
+- 🌙 Dark mode support
+- 📱 Responsive design
 
 ## Tech Stack
 
 - React 18 + TypeScript
-- Vite
-- Tailwind CSS
+- Vite 6
+- Dexie.js (IndexedDB)
+- Zustand (state management)
+- Tailwind CSS + shadcn/ui
+- Recharts
 - React Router DOM
 
 ## Getting Started
 
 ```bash
+# Install dependencies
 npm install
+
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-## Live Demo
+## Deployment
 
-https://zhang1-CPU.github.io/solodesk/
+This project is deployed on GitHub Pages. See `.github/workflows/deploy.yml` for the deployment configuration.

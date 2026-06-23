@@ -1,57 +1,58 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
-import type { MonthlyIncomeData } from '@/types';
 
 interface IncomeChartProps {
-  data: MonthlyIncomeData[];
+  data: { month: string; income: number }[];
 }
 
 export function IncomeChart({ data }: IncomeChartProps) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Income Trend</h3>
-      <div className="h-[280px]">
+    <Card className="col-span-1 lg:col-span-2">
+      <CardHeader>
+        <CardTitle>Income Trend</CardTitle>
+      </CardHeader>
+      <CardContent className="h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis 
-              dataKey="month" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#64748b', fontSize: 12 }}
+          <LineChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+            <XAxis
+              dataKey="month"
+              className="text-xs"
+              stroke="hsl(var(--muted-foreground))"
             />
-            <YAxis 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#64748b', fontSize: 12 }}
-              tickFormatter={(value) => `$${value}`}
+            <YAxis
+              className="text-xs"
+              stroke="hsl(var(--muted-foreground))"
+              tickFormatter={(value) => formatCurrency(value, 'USD').replace('.00', '')}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1e293b', 
-                border: 'none', 
-                borderRadius: '8px',
-                color: '#f8fafc',
-                fontSize: '14px'
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '0.5rem',
               }}
-              formatter={(value: number) => formatCurrency(value)}
+              formatter={(value) => [formatCurrency(Number(value), 'USD'), 'Income']}
             />
-            <Area 
-              type="monotone" 
-              dataKey="amount" 
-              stroke="#10b981" 
+            <Line
+              type="monotone"
+              dataKey="income"
+              stroke="hsl(var(--primary))"
               strokeWidth={2}
-              fill="url(#incomeGradient)" 
+              dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+              activeDot={{ r: 6 }}
             />
-          </AreaChart>
+          </LineChart>
         </ResponsiveContainer>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
