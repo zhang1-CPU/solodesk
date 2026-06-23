@@ -1,71 +1,73 @@
-import { DollarSign, Clock, FolderKanban, FileText } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { formatDate } from '@/lib/utils';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
+import { formatDateRelative, formatCurrency } from '@/lib/utils';
+import { DollarSign, Clock, FolderPlus, UserPlus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface ActivityItem {
-  type: 'income' | 'time' | 'project' | 'invoice';
-  description: string;
-  date: Date;
-}
+export function RecentActivity() {
+  const recentIncome = useLiveQuery(
+    () => db.income.orderBy('createdAt').reverse().limit(3).toArray(),
+    []
+  ) ?? [];
 
-interface RecentActivityProps {
-  activities: ActivityItem[];
-}
+  const recentTime = useLiveQuery(
+    () => db.timeEntries.orderBy('createdAt').reverse().limit(3).toArray(),
+    []
+  ) ?? [];
 
-const activityIcons = {
-  income: DollarSign,
-  time: Clock,
-  project: FolderKanban,
-  invoice: FileText,
-};
+  const recentProjects = useLiveQuery(
+    () => db.projects.orderBy('createdAt').reverse().limit(3).toArray(),
+    []
+  ) ?? [];
 
-const activityColors = {
-  income: 'text-emerald-500 bg-emerald-500/10',
-  time: 'text-blue-500 bg-blue-500/10',
-  project: 'text-purple-500 bg-purple-500/10',
-  invoice: 'text-amber-500 bg-amber-500/10',
-};
+  const activities = [
+    ...recentIncome.map((inc) => ({
+      type: 'income' as const,
+      icon: DollarSign,
+      iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+      iconColor: 'text-emerald-500',
+      text: `Recorded ${formatCurrency(inc.amount)}`,
+      time: formatDateRelative(inc.createdAt),
+    })),
+    ...recentTime.map((entry) => ({
+      type: 'time' as const,
+      icon: Clock,
+      iconBg: 'bg-blue-50 dark:bg-blue-500/10',
+      iconColor: 'text-blue-500',
+      text: `Tracked ${Math.round(entry.duration / 3600 * 10) / 10}h`,
+      time: formatDateRelative(entry.createdAt),
+    })),
+    ...recentProjects.map((proj) => ({
+      type: 'project' as const,
+      icon: FolderPlus,
+      iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+      iconColor: 'text-amber-500',
+      text: `Created project "${proj.name}"`,
+      time: formatDateRelative(proj.createdAt),
+    })),
+  ]
+    .slice(0, 5);
 
-export function RecentActivity({ activities }: RecentActivityProps) {
   return (
-    <Card className="col-span-1 lg:col-span-2">
-      <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-72">
-          <div className="space-y-1 p-4">
-            {activities.length > 0 ? (
-              activities.map((activity, index) => {
-                const Icon = activityIcons[activity.type];
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-4 rounded-lg p-3 hover:bg-accent/50 transition-colors"
-                  >
-                    <div className={`p-2 rounded-lg ${activityColors[activity.type]}`}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(activity.date, 'MMM dd, yyyy HH:mm')}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="flex h-40 items-center justify-center text-muted-foreground">
-                No recent activity
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
+      <div className="space-y-4">
+        {activities.length === 0 ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">No recent activity</p>
+        ) : (
+          activities.map((activity, index) => (
+            <div key={index} className="flex items-center gap-3">
+              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", activity.iconBg)}>
+                <activity.icon className={cn("w-4 h-4", activity.iconColor)} />
               </div>
-            )}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-700 dark:text-slate-200 truncate">{activity.text}</p>
+              </div>
+              <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">{activity.time}</span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   );
 }
