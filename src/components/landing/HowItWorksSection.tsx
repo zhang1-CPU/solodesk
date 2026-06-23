@@ -35,7 +35,7 @@ export function HowItWorksSection() {
         </div>
 
         <div className="flex flex-col md:flex-row items-start justify-between gap-12">
-          {steps.map((step, index) => (
+          {steps.map((step) => (
             <div key={step.number} className="flex-1 flex flex-col items-center text-center">
               <div className="relative mb-6">
                 <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border-2 border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center">
